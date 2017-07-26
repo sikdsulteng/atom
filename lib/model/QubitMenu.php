@@ -381,6 +381,80 @@ class QubitMenu extends BaseMenu
    * @return string an indented, nested XHTML list
    */
   public static function displayHierarchyAsList($parent, $depth = 0, $options = array())
+  { 
+    if (!isset($options['data']))
+    {
+      $children = QubitMenu::hierarchyAsArray($parent, $depth, $options);
+    }
+    else
+    {
+      $children = $options['data'];
+    }
+
+    // Set current depth if not defined yet
+    // We're using it to track the depth of the recursion
+    if (!isset($options['current-depth']))
+    {
+      $options['current-depth'] = 0;
+    }
+
+    // An array of <li/> elements for the list
+    $li = array();
+
+    foreach ($children as $child)
+    {
+      // Determine if we need to keep going down the hierarchy
+      $continueHierarchy = $options['current-depth'] < $depth && $child['hasChildren'];
+
+      // Declare some options for the link for this node
+      $anchorPath = $child['a']['path']; #$child->getPath(array('getUrl' => true, 'resolveAlias' => true));
+      $anchorLabel = $child['a']['options']['label']; #$child->getLabel(array('cultureFallback' => true));
+      $anchorOptions = array();
+      if ($continueHierarchy)
+      {
+        $anchorLabel .= ' <b class="caret"></b>';
+        $anchorOptions['class'] = $child['a']['class'];#'dropdown-toggle';
+        $anchorOptions['data-toggle'] = 'dropdown';
+      }
+
+      // Construct the link
+      $a = link_to($anchorLabel, $anchorPath, $anchorOptions);
+
+      if ($continueHierarchy)
+      {
+        // Nested nodes
+        $a .= self::displayHierarchyAsList($child, $depth, array_merge($options, array('ulWrap' => true, 'ulClass' => 'dropdown-menu', 'current-depth' => ($depth + 1))));
+      }
+
+      // Build string of classes for the class property of the <li> element
+      $class = implode(' ', $child['a']['class']);
+      if (0 < strlen($class))
+      {
+        $class = ' class="'.$class.'"';
+      }
+
+      // Add an #id to make style customizatino easier
+      $id = isset($child['a']['id']) ? ' id="'. $child['a']['id'] .'"' : '';
+
+      $li[] = '<li'.$class.$id.'>'.$a.'</li>';
+    }
+
+    if (isset($options['ulWrap']))
+    {
+      if (!empty($options['ulClass']))
+      {
+        return '<ul class="'.$options['ulClass'].'">'.implode($li).'</ul>';
+      }
+      else
+      {
+        return '<ul class="clearfix links">'.implode($li).'</ul>';
+      }
+    }
+
+    return implode($li);
+  }
+
+  public static function hierarchyAsArray($parent, $depth = 0, $options = array())
   {
     // Set current depth if not defined yet
     // We're using it to track the depth of the recursion
@@ -406,17 +480,21 @@ class QubitMenu extends BaseMenu
 
       // Declare some options for the link for this node
       $anchorPath = $child->getPath(array('getUrl' => true, 'resolveAlias' => true));
-      $anchorLabel = $child->getLabel(array('cultureFallback' => true));
       $anchorOptions = array();
+      $anchorOptions['label'] = $child->getLabel(array('cultureFallback' => true));
+
       if ($continueHierarchy)
       {
-        $anchorLabel .= ' <b class="caret"></b>';
         $anchorOptions['class'] = 'dropdown-toggle';
         $anchorOptions['data-toggle'] = 'dropdown';
       }
 
       // Construct the link
-      $a = link_to($anchorLabel, $anchorPath, $anchorOptions);
+      #$a = link_to($anchorLabel, $anchorPath, $anchorOptions);
+      $a = array(
+        'path' => $anchorPath,
+        'options' => $anchorOptions
+      );
 
       // An array of CSS classes for the li element
       $class = array();
@@ -428,7 +506,7 @@ class QubitMenu extends BaseMenu
       if ($continueHierarchy)
       {
         // Nested nodes
-        $a .= self::displayHierarchyAsList($child, $depth, array_merge($options, array('ulWrap' => true, 'ulClass' => 'dropdown-menu', 'current-depth' => ($depth + 1))));
+        $a .= self::hierarchyAsArray($child, $depth, array_merge($options, array('ulWrap' => true, 'ulClass' => 'dropdown-menu', 'current-depth' => ($depth + 1))));
 
         // We need this class for the <li> element
         $class[] = 'dropdown';
@@ -439,31 +517,29 @@ class QubitMenu extends BaseMenu
         $class[] = 'leaf';
       }
 
-      // Build string of classes for the class property of the <li> element
-      $class = implode(' ', $class);
-      if (0 < strlen($class))
-      {
-        $class = ' class="'.$class.'"';
-      }
-
       // Add an #id to make style customizatino easier
-      $id = isset($child->name) ? ' id="node_'.$child->name.'"' : '';
+      $id = isset($child->name) ? 'node_'.$child->name : '';
 
-      $li[] = '<li'.$class.$id.'>'.$a.'</li>';
+      $li[] = array(
+        'id' => $id,
+        'class' => $class,
+        'a' => $a,
+        'hasChildren' => $child->hasChildren()
+      );
     }
 
     if (isset($options['ulWrap']))
     {
       if (!empty($options['ulClass']))
       {
-        return '<ul class="'.$options['ulClass'].'">'.implode($li).'</ul>';
+        return array('ul' => $li, 'ulClass' => $options['ulClass']);
       }
       else
       {
-        return '<ul class="clearfix links">'.implode($li).'</ul>';
+        return array('ul' => $li);
       }
     }
 
-    return implode($li);
+    return $li;
   }
 }

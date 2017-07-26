@@ -30,8 +30,6 @@
 
     <?php echo get_component('menu', 'clipboardMenu') ?>
 
-    <?php echo get_component('menu', 'mainMenu', array('sf_cache_key' => $sf_user->getCulture().$sf_user->getUserID())) ?>
-
   </nav>
 
   <div id="search-bar">
