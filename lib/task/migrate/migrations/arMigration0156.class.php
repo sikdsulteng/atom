@@ -62,7 +62,7 @@ CREATE TABLE `clipboard_save_item` (
   `slug` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `clipboard_save_item_FI_1` (`save_id`),
-  CONSTRAINT `clipboard_save_item_FK_1` FOREIGN KEY (`save_id`) REFERENCES `clipboard_save` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `clipboard_save_item_FK_1` FOREIGN KEY (`save_id`) REFERENCES `clipboard_save` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 sql;
