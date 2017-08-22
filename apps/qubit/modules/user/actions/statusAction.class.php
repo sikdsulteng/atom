@@ -58,7 +58,36 @@ class UserStatusAction extends sfAction
       array_push($objectCountDescriptions, $this->context->i18n->__('%1% count: %2%', array('%1%' => $objectTypes[$objectType], '%2%' => $countType)));
     }
 
-    // Main menu items
+    // Amalgamate response data
+    $response = array(
+      'clipboard' => array(
+        'count' => $count,
+        'countByType' => $countByType,
+        'objectCountDescriptions' => $objectCountDescriptions,
+        'slugs' => $slugsInClipboard,
+      ),
+      'menus' => array(
+        'mainItems' => $this->mainMenuItems()
+      )
+    );
+
+    // Augment response data
+    if ($this->context->user->isAuthenticated())
+    {
+      $response['user'] = array(
+        'username' => $this->context->user->user->username,
+        'gravatar' => sprintf('https://www.gravatar.com/avatar/%s?s=%s',
+          md5(strtolower(trim($this->context->user->user->email))),
+          25
+        )
+      );
+    }
+
+    return $this->renderText(json_encode($response));
+  }
+
+  private function mainMenuItems()
+  {
     $addMenu = QubitMenu::getById(QubitMenu::ADD_EDIT_ID);
     $manageMenu = QubitMenu::getById(QubitMenu::MANAGE_ID);
     $importMenu = QubitMenu::getById(QubitMenu::IMPORT_ID);
@@ -66,6 +95,7 @@ class UserStatusAction extends sfAction
 
     $mainItems = array();
 
+    // Populate main menu item array if authenticated
     if ($this->context->user->isAuthenticated())
     {
       foreach (array($adminMenu, $importMenu, $manageMenu, $addMenu) as $menu)
@@ -83,27 +113,6 @@ class UserStatusAction extends sfAction
       }
     }
 
-// TODO: org this
-    // Amalgamate response data
-    $response = array(
-      'count' => $count,
-      'countByType' => $countByType,
-      'objectCountDescriptions' => $objectCountDescriptions,
-      'slugs' => $slugsInClipboard,
-      'mainItems' => $mainItems
-    );
-
-    // Augment response data
-    if ($this->context->user->isAuthenticated())
-    {
-      $response['username'] = $this->context->user->user->username;
-
-      $response['gravatar'] = sprintf('https://www.gravatar.com/avatar/%s?s=%s',
-        md5(strtolower(trim($this->context->user->user->email))),
-        25
-      );
-    }
-
-    return $this->renderText(json_encode($response));
+    return $mainItems;
   }
 }

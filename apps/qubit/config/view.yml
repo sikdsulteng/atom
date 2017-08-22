@@ -47,6 +47,7 @@ default:
     qubit:
     treeView:
     clipboard:
+    statusUpdate:
     dominion: { position: last }
 
   has_layout:     true
