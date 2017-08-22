@@ -100,18 +100,46 @@ class QubitMenu extends BaseMenu
       // admin puts in a bad route
       try
       {
-        $url = url_for($path);
+        $url = $this->urlFor($path);
       }
       catch (Exception $e)
       {
         // if exception caught then return a blank route (home page)
-        $url = url_for('');
+        $url = $this->urlFor('');
       }
 
       $path = $url;
     }
 
     return $path;
+  }
+
+  private function urlFor()
+  {
+    // for BC with 1.1
+    $arguments = func_get_args();
+
+    // http://trac.symfony-project.org/ticket/7933
+    if (!is_string($arguments[0]) || '@' == substr($arguments[0], 0, 1) || false !== strpos($arguments[0], '/'))
+    {
+      return call_user_func_array(array($this, 'urlFor1'), $arguments);
+    }
+    else
+    {
+      return call_user_func_array(array($this, 'urlFor2'), $arguments);
+    }
+  }
+
+  private function urlFor1($internal_uri, $absolute = false)
+  {
+    return sfContext::getInstance()->getController()->genUrl($internal_uri, $absolute);
+  }
+
+  private function urlFor2($routeName, $params = array(), $absolute = false)
+  {
+    $params = array_merge(array('sf_route' => $routeName), is_object($params) ? array('sf_subject' => $params) : $params);
+
+    return $this->urlFor1($params, $absolute);
   }
 
   /**
@@ -163,7 +191,7 @@ class QubitMenu extends BaseMenu
   {
     $currentModule = sfContext::getInstance()->getModuleName();
     $currentAction = sfContext::getInstance()->getActionName();
-    $currentUrl = url_for($currentModule.'/'.$currentAction);
+    $currentUrl = $this->urlFor($currentModule.'/'.$currentAction);
     $isSelected = false;
 
     // Yucky Hack: Don't display "static" menu as selected when displaying

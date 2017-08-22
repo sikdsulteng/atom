@@ -66,8 +66,6 @@ class UserStatusAction extends sfAction
 
     $mainItems = array();
 
-include('vendor/symfony/lib/helper/TagHelper.php');
-include('vendor/symfony/lib/helper/UrlHelper.php');
     if ($this->context->user->isAuthenticated())
     {
       foreach (array($adminMenu, $importMenu, $manageMenu, $addMenu) as $menu)
