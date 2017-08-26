@@ -1,7 +1,10 @@
 jQuery(function ()
   {
+    // Create string representing currently displayed slugs, if any
+    var slugsDisplayedString = 'slugsDisplayed' in Qubit ? Qubit.slugsDisplayed.join(',') : '';
+
     jQuery.ajax({
-      url: '/user/status?slugs=' + Qubit.slugsDisplayed.join(','),
+      url: '/user/status?slugs=' + slugsDisplayedString,
       dataType: 'json',
       success: function (results)
         {
@@ -39,42 +42,6 @@ jQuery(function ()
             {
               jQuery('#count-block').html(clipboard.objectCountDescriptions.join('<br />'));
             }
-
-          // Display appropriate user menu
-          var userMenuId = results.hasOwnProperty('user') ? 'user-menu' : 'user-menu-unauth';
-          jQuery('#' + userMenuId).show();
-
-          // If user is authenticated, show username, etc.
-          if (userMenuId == 'user-menu')
-            {
-              jQuery('#' + userMenuId + ' > button').text(results.user.username);
-              jQuery('#user-menu-username').text(results.user.username);
-            }
-
-          // Add main menu items
-          results.menus.mainItems.forEach(function(item)
-            {
-              var divEl = jQuery("<div id='" + item.name + "-menu' data-toggle='tooltip' data-title='" + item.label + "'></div>");
-              divEl.append(jQuery('<button class="top-item" data-toggle="dropdown" data-target="#" aria-expanded="false">' + item.label + '</button>'));
-              var dropDownDivEl = jQuery('<div class="top-dropdown-container"></div>');
-              dropDownDivEl.append(jQuery('<div class="top-dropdown-arrow"><div class="arrow"></div></div>'));
-              dropDownDivEl.append(jQuery('<div class="top-dropdown-header"><h2>' + item.label + '</h2></div>'));
-
-              var ulEl = jQuery('<ul></ul>');
-
-              item.items.forEach(function(item)
-                {
-                  ulEl.append('<a href="' + item.a.path + '">' + item.a.options.label + '</a>');
-                });
-
-              var bodyDivEl = jQuery('<div class="top-dropdown-body"></div>');
-              bodyDivEl.append(ulEl);
-              dropDownDivEl.append(bodyDivEl);
-
-              dropDownDivEl.append(jQuery('<div class="top-dropdown-bottom"></div>'));
-              divEl.append(dropDownDivEl);
-              jQuery('#top-bar > nav').append(divEl);
-            });
         }
     });
   });

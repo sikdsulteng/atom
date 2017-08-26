@@ -66,53 +66,8 @@ class UserStatusAction extends sfAction
         'objectCountDescriptions' => $objectCountDescriptions,
         'slugs' => $slugsInClipboard,
       ),
-      'menus' => array(
-        'mainItems' => $this->mainMenuItems()
-      )
     );
 
-    // Augment response data
-    if ($this->context->user->isAuthenticated())
-    {
-      $response['user'] = array(
-        'username' => $this->context->user->user->username,
-        'gravatar' => sprintf('https://www.gravatar.com/avatar/%s?s=%s',
-          md5(strtolower(trim($this->context->user->user->email))),
-          25
-        )
-      );
-    }
-
     return $this->renderText(json_encode($response));
-  }
-
-  private function mainMenuItems()
-  {
-    $addMenu = QubitMenu::getById(QubitMenu::ADD_EDIT_ID);
-    $manageMenu = QubitMenu::getById(QubitMenu::MANAGE_ID);
-    $importMenu = QubitMenu::getById(QubitMenu::IMPORT_ID);
-    $adminMenu = QubitMenu::getById(QubitMenu::ADMIN_ID);
-
-    $mainItems = array();
-
-    // Populate main menu item array if authenticated
-    if ($this->context->user->isAuthenticated())
-    {
-      foreach (array($adminMenu, $importMenu, $manageMenu, $addMenu) as $menu)
-      {
-        if (($menu->getName() == 'add' || $menu->getName() == 'manage') || $this->context->user->isAdministrator())
-        {
-          $mainItems[] = array(
-            'name' => $menu->getName(),
-            'label' => $menu->getLabel(array('cultureFallback' => true)),
-            'items' => QubitMenu::hierarchyAsArray($menu, 0, array(
-              'overrideVisibility' => array('admin' => $this->context->user->isAdministrator())
-            ))
-          );
-        }
-      }
-    }
-
-    return $mainItems;
   }
 }
