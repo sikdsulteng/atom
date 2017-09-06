@@ -84,7 +84,7 @@ class UserClipboardLoadAction extends DefaultEditAction
         // Attempt to add saved clipboard to user's clipboard and notify user of results
         if (null === $addedCount = $this->addSavedClipboardItems($this->password, $this->mode))
         {
-          $message = $this->context->i18n->__('Incorrect clipoard ID for saved clipboard.');
+          $message = $this->context->i18n->__('Incorrect clipboard ID for saved clipboard.');
           $this->context->user->setFlash('error', $message);
         }
         else
