@@ -44,8 +44,8 @@ class UserClipboardLoadAction extends DefaultEditAction
         $this->form->setDefault('mode', 'merge');
         $this->form->setValidator('mode', new sfValidatorString);
         $choices = array(
-          'merge' => 'Merge saved clipboard with existing clipboard results',
-          'replace' => 'Replace existing clipboard results with saved clipboard'
+          'merge' => $this->context->i18n->__('Merge saved clipboard with existing clipboard results'),
+          'replace' => $this->context->i18n->__('Replace existing clipboard results with saved clipboard')
         );
         $this->form->setWidget('mode', new sfWidgetFormSelect(array('choices' => $choices)));
 
@@ -89,10 +89,18 @@ class UserClipboardLoadAction extends DefaultEditAction
         }
         else
         {
-          $action = ($this->mode == 'replace') ? 'added' : 'merged with current clipboard';
+          if ($this->mode == 'replace')
+          {
+            $actionDescription = $this->context->i18n->__('added');
+          }
+          else
+          {
+            $actionDescription = $this->context->i18n->__('merged with current clipboard');
+          }
+
           $message = $this->context->i18n->__(
             'Clipboard %1% loaded, %2% records %3%.',
-            array('%1%' => $this->password, '%2%' => $addedCount, '%3%' => $action)
+            array('%1%' => $this->password, '%2%' => $addedCount, '%3%' => $actionDescription)
           );
           $this->context->user->setFlash('info', $message);
         }
