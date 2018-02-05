@@ -58,3 +58,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+#fullwidth-treeview-reset-button {
+  margin-top: 14px;
+  float: right;
+}

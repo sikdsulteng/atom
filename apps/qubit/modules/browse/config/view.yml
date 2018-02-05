@@ -1,0 +1,8 @@
+hierarchySuccess:
+  stylesheets:
+    /vendor/jstree/themes/default/style.min.css:
+    fullWidthTreeView:
+  javascripts:
+    /vendor/yui/cookie/cookie-min.js:
+    /vendor/jstree/jstree.min.js:
+    hierarchy:
