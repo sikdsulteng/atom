@@ -721,10 +721,54 @@ class arElasticSearchPluginUtil
     {
       foreach ($resultSet as $hit)
       {
-       array_push($hitIds, $hit->getId()); 
+       array_push($hitIds, $hit->getId());
       }
     }
 
     return $hitIds;
+  }
+
+  /**
+   * Get an array outlining which top level description the current description is part of.
+   *
+   * @param int $collectionRootId  The id for the top level description in this hierarchy.
+   * @param int $currentId  The id of the current description we're returning the part of info for.
+   * @return array  An array containing the id and various i18n titles of the top level description.
+   *                If this description is already a TLD or another issue occurs, return null.
+   */
+  public static function getPartOf($collectionRootId, $currentId)
+  {
+    $collectionRootId = $this->getCollectionRootId();
+
+    if ($collectionRootId && $collectionRootId != $currentId)
+    {
+      $rootSlug = QubitPdo::fetchColumn('SELECT slug FROM slug WHERE object_id=?', array($collectionRootId));
+      if (!$rootSlug)
+      {
+        throw new sfException("No slug found for information object $collectionRootId");
+      }
+
+      $rootSourceCulture = QubitPdo::fetchColumn('SELECT source_culture FROM information_object WHERE id=?',
+                                                array($collectionRootId));
+      if (!$rootSourceCulture)
+      {
+        throw new sfException("No source culture found for information object $collectionRootId");
+      }
+
+      $i18nFields = arElasticSearchModelBase::serializeI18ns(
+        $collectionRootId,
+        array('QubitInformationObject'),
+        array('fields' => array('title'))
+      );
+
+      return array(
+        'id' => $collectionRootId,
+        'sourceCulture' => $rootSourceCulture,
+        'slug' => $rootSlug,
+        'i18n' => $i18nFields,
+      );
+    }
+
+    return null;
   }
 }
