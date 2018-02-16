@@ -61,6 +61,11 @@ class arElasticSearchInformationObject extends arElasticSearchModelBase
    */
   public function recursivelyUpdateInformationObjects($parentId, $totalRows, $updateFunc, $options = array())
   {
+    if (!isset(self::$conn))
+    {
+      self::$conn = Propel::getConnection();
+    }
+
     // Get information objects
     if (!isset(self::$statements['getChildren']))
     {
@@ -139,7 +144,7 @@ class arElasticSearchInformationObject extends arElasticSearchModelBase
     }
 
     // Add "Part of" title if this isn't a top level description
-    if (null !== $partOf = $this->getPartOf())
+    if (null !== $partOf = $node->getPartOf())
     {
       $data['partOf'] = $partOf;
     }

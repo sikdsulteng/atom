@@ -1070,7 +1070,7 @@ class arElasticSearchInformationObjectPdo
    * @return array  An array containing the id and various i18n titles of the top level description.
    *                If this description is already a TLD or another issue occurs, return null.
    */
-  private function getPartOf($collectionRootId)
+  public function getPartOf($collectionRootId)
   {
     $collectionRootId = $this->getCollectionRootId();
 
